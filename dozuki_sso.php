@@ -3,21 +3,23 @@ DozukiAuthentication::authenticate();
 
 class DozukiAuthentication {
    public static function authenticate() {
-      $userInfo = $this->getUserInfo();
+      $userInfo = self::getUserInfo();
       if (!$userInfo)
          self::sendToLogin();
 
       $params = array_merge($userInfo, array(
-         't' = time()
+         't' => time()
       ));
 
-      $destinationURL = self::$dozukiSite . '/Guide/remote_login?';
+      $destinationURL = 'https://' . self::$dozukiSite .
+       '/Guide/User/remote_login?';
 
       $query = http_build_query($params);
       $hash = sha1($query . self::$secret);
       $query .= "&hash=" . $hash;
 
-      http_redirect($destinationURL . $query);
+      header("Location: " . $destinationURL . $query);
+      exit();
    }
 
    // ========================================================
@@ -51,6 +53,4 @@ class DozukiAuthentication {
       // Or, just render the login page
    }
 }
-
-DozukiAuthentication::authenticate();
 
