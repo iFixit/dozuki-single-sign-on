@@ -11,8 +11,9 @@ class DozukiAuthentication {
          't' => time()
       ));
 
+      $testMode = self::$forceTestMode;
       $destinationURL = 'https://' . self::$dozukiSite .
-       '/Guide/User/remote_login' . (self::$testMode ? '/test' : '') . '?';
+       '/Guide/User/remote_login' . ($testMode ? '/test' : '') . '?';
 
       $query = http_build_query($params);
       $hash = sha1($query . self::$secret);
@@ -27,7 +28,7 @@ class DozukiAuthentication {
    // ========================================================
    protected static $dozukiSite = 'yoursitename.dozuki.com';
    protected static $secret = 'abcdefghijklmnopqrstuvwxyz01234567890';
-   protected static $testMode = true;
+   protected static $forceTestMode = false;
 
    /**
     * Change this function to return the specified info for the currently 
