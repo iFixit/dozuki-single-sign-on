@@ -12,7 +12,7 @@ class DozukiAuthentication {
       ));
 
       $testMode = self::$forceTestMode;
-      $destinationURL = 'https://' . self::$dozukiSite .
+      $destinationURL = 'http://' . self::$dozukiSite .
        '/Guide/User/remote_login' . ($testMode ? '/test' : '') . '?';
 
       $query = http_build_query($params);
