@@ -1,22 +1,26 @@
 <?php
-DozukiAuthentication::authenticate();
 
+/**
+ * Base implementation of dozuki authentication
+ *
+ * from here: https://github.com/iFixit/dozuki-single-sign-on
+ */
 class DozukiAuthentication {
    public static function authenticate() {
-      $userInfo = self::getUserInfo();
+      $userInfo = static::getUserInfo();
       if (!$userInfo)
-         self::sendToLogin();
+         static::sendToLogin();
 
       $params = array_merge($userInfo, array(
          't' => time()
       ));
 
-      $testMode = self::$forceTestMode;
-      $destinationURL = 'http://' . self::$dozukiSite .
+      $testMode = static::$forceTestMode;
+      $destinationURL = 'http://' . static::$dozukiSite .
        '/Guide/User/remote_login' . ($testMode ? '/test' : '') . '?';
 
       $query = http_build_query($params);
-      $hash = sha1($query . self::$secret);
+      $hash = sha1($query . static::$secret);
       $query .= "&hash=" . $hash;
 
       header("Location: " . $destinationURL . $query);
@@ -31,7 +35,7 @@ class DozukiAuthentication {
    protected static $forceTestMode = false;
 
    /**
-    * Change this function to return the specified info for the currently 
+    * Change this function to return the specified info for the currently
     * logged in user. If the current user is anonymous, this should return
     * null.
     */
@@ -56,3 +60,4 @@ class DozukiAuthentication {
    }
 }
 
+DozukiAuthentication::authenticate();
