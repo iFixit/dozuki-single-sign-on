@@ -7,7 +7,12 @@
  */
 class DozukiAuthentication {
    public static function authenticate() {
-      header("Location: " . self::generateSignedUrl('login'));
+      if (!static::isLoggedIn()) {
+         static::sendToLogin();
+      } else {
+         header("Location: " . self::generateSignedUrl('login'));
+      }
+
       exit();
    }
 
@@ -16,8 +21,12 @@ class DozukiAuthentication {
     * getUserInfo() logged out of Dozuki.
     */
    public static function logout() {
+      if (!static::isLoggedIn()) {
+         return;
+      }
+
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, self::generateSignedUrl('logout'));
+      curl_setopt($ch, CURLOPT_URL,  self::generateSignedUrl('logout'));
       curl_setopt($ch, CURLOPT_POST, true);
       curl_exec($ch);
       curl_close($ch);
@@ -25,9 +34,6 @@ class DozukiAuthentication {
 
    protected static function generateSignedUrl($type = 'login') {
       $userInfo = static::getUserInfo();
-      if (!$userInfo && $type == 'login')
-         static::sendToLogin();
-
       $params = array_merge($userInfo, array(
          't' => time()
       ));
@@ -52,8 +58,8 @@ class DozukiAuthentication {
 
    /**
     * Change this function to return the specified info for the currently
-    * logged in user. If the current user is anonymous, this should return
-    * null.
+    * logged in user. This function will only be called if is LoggedIn()
+    * returns true.
     */
    protected static function getUserInfo() {
       return array(
@@ -64,6 +70,15 @@ class DozukiAuthentication {
          // A users's real name, if available
          'name' => 'First Last'
       );
+   }
+
+   /**
+    * Change this function to return true if a user is logged into your site
+    * and false if not.
+    */
+   protected static function isLoggedIn() {
+      // something like:
+      // return isset($_SESSION['userid']);
    }
 
    /**
