@@ -7,8 +7,25 @@
  */
 class DozukiAuthentication {
    public static function authenticate() {
+      header("Location: " . self::generateSignedUrl('login'));
+      exit();
+   }
+
+   /**
+    * Call this function to have the currently logged in user (as returned by 
+    * getUserInfo() logged out of Dozuki.
+    */
+   public static function logout() {
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, self::generateSignedUrl('logout'));
+      curl_setopt($ch, CURLOPT_POST, true);
+      curl_exec($ch);
+      curl_close($ch);
+   }
+
+   protected static function generateSignedUrl($type = 'login') {
       $userInfo = static::getUserInfo();
-      if (!$userInfo)
+      if (!$userInfo && $type == 'login')
          static::sendToLogin();
 
       $params = array_merge($userInfo, array(
@@ -17,14 +34,13 @@ class DozukiAuthentication {
 
       $testMode = static::$forceTestMode;
       $destinationURL = 'http://' . static::$dozukiSite .
-       '/Guide/User/remote_login' . ($testMode ? '/test' : '') . '?';
+       "/Guide/User/remote_$type" . ($testMode ? '/test' : '') . '?';
 
       $query = http_build_query($params);
       $hash = sha1($query . static::$secret);
       $query .= "&hash=" . $hash;
 
-      header("Location: " . $destinationURL . $query);
-      exit();
+      return $destinationURL . $query;
    }
 
    // ========================================================
